@@ -1,0 +1,244 @@
+🔥WELCOME🔥
+<html>   
+<head>    
+<title>Pirdan Viral Game</title>    
+<meta name="viewport" content="width=device-width, initial-scale=1.0">    
+<style>    
+body{    
+ font-family:Arial;    
+ text-align:center;    
+ background:linear-gradient(45deg,#ff9a9e,#a1c4fd);    
+}    
+.card{    
+ background:#6adec8;    
+ padding:20px;    
+ margin:111px auto;    
+ width:80%;    
+ max-width:350px;    
+ border-radius:30px;    
+}    
+button,input{    
+ padding:11px;    
+ margin:5px;    
+ border-radius:10px;    
+ border:none;    
+}    
+button{background:#0200fa;color:white;}    
+#hpFill{    
+ height:15px;    
+ background:#ff00d5;    
+ color:white;    
+ border-radius:90px;    
+ transition: width 0.3s, background 0.3s;    
+}    
+.hidden{display:none;}    
+#feedback{    
+ color:blue;    
+ font-weight:bold;    
+ margin-top:5px;    
+}    
+#coin{    
+ display:inline-block;    
+ transition: transform 0.3s;    
+}    
+#shop{    
+ margin-top:10px;    
+ background:#fff;    
+ padding:10px;    
+ border-radius:10px;    
+}    
+#ownerPanel{    
+ margin-top:10px;    
+ background:#fff;    
+ padding:10px;    
+ border-radius:10px;    
+ display:none;    
+}    
+</style>    
+</head>  <body>  <div id="login" class="card">    
+<h2>🔥 PIRDAN GAME 🔥</h2>    
+<input id="name" placeholder="YOUR NAME">    
+<button onclick="start()">START</button>
+<div id="marquee"><span id="marqueeText">🔥 Selamat datang di PIRDAN GAME! Tebak angka, kumpulkan coin, beli HP & timer! 🔥</span></div>
+</div>  
+</div>  <div id="game" class="card hidden">    
+<h3 id="player"></h3>    
+<div id="info"></div>  <div style="background:#ddd;border-radius:10px;">    
+<div id="hpFill"></div>    
+</div>  <div>⏱️ <span id="time"></span> | 💰 <span id="coin"></span></div>  <input id="guess" type="number" placeholder="Tebak angka">    
+<button onclick="check()">Tebak</button>    
+<div id="feedback"></div>  <h4>📢┇EVENT </h4>    
+<div id="mission"></div>  <h4>🎁 Battle Pass</h4>    
+<div id="bp"></div>  <h4>🛒 Shop</h4>    
+<div id="shop">    
+<button onclick="buyHP()">Beli +1 HP (5 coin)</button>    
+<button onclick="buyTimer()">Beli +15 detik timer (10 coin)</button>    
+</div>  <!-- Owner access -->  <h4>🔒 Owner Panel</h4>    
+<input id="ownerKey" type="password" placeholder="Enter Owner Key">    
+<button onclick="checkOwnerKey()">Unlock Owner Features</button>    
+<div id="ownerPanel">    
+<button onclick="ownerAddCoin()">+10000 Coin</button>    
+<button onclick="ownerFullHP()">Isi HP Penuh</button>    
+</div>  <div id="feed"></div>    
+</div>  <!-- Sound effect -->  <audio id="soundCorrect" src="https://freesound.org/data/previews/170/170203_2437358-lq.mp3"></audio>  
+<audio id="soundWrong" src="https://freesound.org/data/previews/256/256113_4486188-lq.mp3"></audio>  <script>    
+let level=1,hp=10,maxHp=10,maxRange=50,number,time=15,timer;    
+let coin=100; // mulai dengan 100 coin    
+let missionText="MENANGKAN 3× UNTUK MENDAPATKAN 1.500 RUPIAH ";    
+let combo=0;    
+const OWNER_KEY="pirdan123"; // key owner    
+    
+function start(){    
+ let name=document.getElementById("name").value||"Player";    
+ document.getElementById("player").innerText="👤 "+name;    
+    
+ document.getElementById("login").classList.add("hidden");    
+ document.getElementById("game").classList.remove("hidden");    
+    
+ startLevel();    
+}    
+    
+function startLevel(){    
+ number=Math.floor(Math.random()*maxRange)+1;    
+    
+ clearInterval(timer);    
+ timer=setInterval(()=>{    
+  time--;    
+  document.getElementById("time").innerText=time;    
+  if(time<=0){    
+    hp--;    
+    time=15;    
+    document.getElementById("feedback").innerText="⏳ Waktu habis!";    
+    combo=0;    
+    playSound('wrong');    
+  }    
+  updateUI();    
+ },1000);    
+    
+ updateUI();    
+}    
+    
+function check(){    
+ let g=parseInt(document.getElementById("guess").value);    
+ if(!g) return;    
+    
+ let feedback = document.getElementById("feedback");    
+ let coinDisplay = document.getElementById("coin");    
+    
+ if(g===number){    
+   combo++;    
+   let earned = 2 + combo;    
+   coin += earned;    
+    
+   // animasi coin    
+   coinDisplay.style.transform="scale(1.5)";    
+   setTimeout(()=>{coinDisplay.style.transform="scale(1)";},300);    
+    
+   level++;    
+   maxRange+=50;    
+   hp=maxHp;    
+   nextMission();    
+   startLevel();    
+   feedback.innerText=`✅ Benar! Angka ${number} | Combo x${combo} (+${earned}💰)`;    
+   playSound('correct');    
+ } else {    
+   hp--;    
+   combo=0;    
+   if(g < number){    
+     feedback.innerText="⬆️ Terlalu kecil!";    
+   } else {    
+     feedback.innerText="⬇️ Terlalu besar!";    
+   }    
+   shake();    
+   playSound('wrong');    
+ }    
+    
+ if(hp<=0){    
+   alert(`💀 YAAAA KALAH YAA COBA LAGI YA SAYANG😘.┇YOUR LvL ${level}`);     
+   location.reload();    
+ }    
+    
+ updateUI();    
+}    
+    
+function buyHP(){    
+ if(coin>=5){    
+   maxHp +=1;    
+   hp +=1; // langsung tambah HP juga    
+   coin -=5;    
+   updateUI();    
+} else {    
+  alert("❌ Coin tidak cukup!");    
+}    
+}    
+    
+function buyTimer(){    
+ if(coin>=10){    
+   time +=15;    
+   coin -=10;    
+   updateUI();    
+} else {    
+  alert("❌ Coin tidak cukup!");    
+}    
+}    
+    
+function playSound(type){    
+ if(type==='correct') document.getElementById('soundCorrect').play();    
+ if(type==='wrong') document.getElementById('soundWrong').play();    
+}    
+    
+function nextMission(){    
+ missionText="Capai level "+(level+2);    
+}    
+    
+function updateUI(){    
+ document.getElementById("info").innerText="Level "+level+" | 1-"+maxRange;    
+ document.getElementById("hpFill").style.width=(hp/maxHp*100)+"%";    
+ if(hp/maxHp > 0.6) document.getElementById("hpFill").style.background="#00ff00";    
+ else if(hp/maxHp > 0.3) document.getElementById("hpFill").style.background="#ffa500";    
+ else document.getElementById("hpFill").style.background="#ff0000";    
+    
+ document.getElementById("coin").innerText=coin;    
+ document.getElementById("mission").innerText=missionText;    
+ document.getElementById("bp").innerText="HADIAH Lv "+level;    
+ document.getElementById("time").innerText=time;    
+}    
+    
+function shake(){    
+ document.body.style.transform="translateX(5px)";    
+ setTimeout(()=>document.body.style.transform="translateX(0)",100);    
+}    
+    
+setInterval(()=>{    
+ let names=["PRASS","RISKI","BAYUUUU","REZAA","VANEZA","ANGGUN","ALYA","SUPRI","PIDAL","NOPAL","PRIDANIAL","KONTOL"];    
+ document.getElementById("feed").innerText=    
+ names[Math.floor(Math.random()*names.length)]+"💡JOIN THE GAME";    
+},3000);
+
+
+    
+// Owner functions    
+function checkOwnerKey(){    
+ let input=document.getElementById("ownerKey").value.trim();    
+ if(input===OWNER_KEY){    
+   document.getElementById("ownerPanel").style.display="block";    
+   alert("Owner access granted!");    
+ } else {    
+   alert("❌ Key salah!");    
+ }    
+}    
+    
+function ownerAddCoin(){    
+ coin += 10000;    
+ updateUI();    
+}    
+    
+function ownerFullHP(){    
+ hp = maxHp; // isi hp sampai batas max saat ini    
+ updateUI();    
+}    
+</script>  
+</body>   
+</html>    
+📢 WELCOME TO PIRDAN GAME 
+      COLLECT BOLT COINS TO BUY TIMER AND CHANCE
